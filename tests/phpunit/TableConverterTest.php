@@ -49,7 +49,8 @@ class TableConverterTest extends \PHPUnit_Framework_TestCase {
 <td>c3
 </td><td>c4
 </td></tr></table>';
-		$result = $this->instance->out;
+		$result = $this->instance->getHtml();
+
 		$this->assertEquals($expected, $result);
 	}
 
@@ -78,6 +79,26 @@ class TableConverterTest extends \PHPUnit_Framework_TestCase {
 		$expected = '<table>
 <tr>
 <td> cel1 </td><td> cel 2
+</td></tr></table>';
+		$this->assertEquals($expected, $result);
+	}
+
+	public function testConvertComplex() {
+		$text = '{| cellspacing="0" border="0"
+| height="17" align="left" |234d
+| align="right" |1234
+|-
+| height="17" align="right" |324
+| align="left" |SFZSD
+|}';
+		$result = $this->instance->convert($text);
+		$expected = '<table cellspacing="0" border="0">
+<tr>
+<td height="17" align="left">234d
+</td><td align="right">1234
+</td></tr><tr>
+<td height="17" align="right">324
+</td><td align="left">SFZSD
 </td></tr></table>';
 		$this->assertEquals($expected, $result);
 	}

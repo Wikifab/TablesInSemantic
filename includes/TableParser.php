@@ -17,8 +17,26 @@ class TableParser {
 		$this->i = 0;
 		$size = strlen($text);
 
-		while ($this->i < $size && $this->i !== false) {
-			$this->i = $this->indexOfNextTemplate($this->i, $text);
+		$this->i = $this->indexOfNextTemplate($this->i, $text);
+		while ($this->i !== false) {
+
+			$templateFound = $this->findTableInTemplate($this->i, $text);
+
+			if ($templateFound) {
+				$wikitextTable = $this->findTableTemplateString($text, $templateFound);
+
+				if( $wikitextTable) {
+					$converter = new TableConverter();
+					$htmlTable = $converter->convert($wikitextTable);
+					$text = str_replace($wikitextTable, $htmlTable, $text);
+					$this->i = $this->i + strlen($htmlTable);
+				} else {
+					$this->i = $this->indexOfNextTemplate($this->i, $text);
+				}
+			} else {
+				$this->i = $this->indexOfNextTemplate($this->i, $text);
+			}
+
 		}
 
 	}

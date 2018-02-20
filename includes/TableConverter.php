@@ -7,26 +7,57 @@ class TableConverter {
 
 	var $debug = false;
 
-	var $i = 0, $out = '';
+	var $i = 0, $out = '', $elements = '';
 	var $rowStarted = false, $cellStarted = false;
 
 	public function __construct() {
 
 	}
 
+	public function addElement($type, $close = false) {
+		$this->elements[] = ['type' => $type, 'isClosing' => $close, 'content' => "\n"];
+	}
+	public function addElementContent($content) {
+
+		$i = count($this->elements) -1;
+		$type = $this->elements[$i]['type'];
+		switch ($type) {
+			case 'table' :
+				$this->elements[$i]['params'] = str_replace("\n", " ", $content);
+				break;
+			case 'tr' :
+				$this->elements[$i]['params'] = str_replace("\n", " ", $content);
+				break;
+			case 'td' :
+				if(preg_match('/^([^\\|]+)\\|(.*)$/', $content, $matches)) {
+					$this->elements[$i]['params'] = $matches[1];
+					$this->elements[$i]['content'] = substr($content, strlen($matches[1])+1);
+				} else {
+					$this->elements[$i]['content'] = $content;
+				}
+				break;
+		}
+	}
+
 	public function init() {
 		$this->out = '<table>';
+		$this->elements = [];
+		$this->addElement('table');
 	}
 	public function end($previous) {
+		$this->addElementContent($previous);
 		$this->out .= $previous;
 		if ($this->cellStarted) {
 			$this->out .= '</td>';
 			$this->cellStarted = false;
+			$this->addElement('td', true);
 		}
 		if ($this->rowStarted) {
 			$this->out .= '</tr>';
 			$this->rowStarted = false;
+			$this->addElement('tr', true);
 		}
+		$this->addElement('table', true);
 		$this->out .= '</table>';
 	}
 
@@ -39,31 +70,61 @@ class TableConverter {
 	}
 
 	public function startRow($previous) {
+		$this->addElementContent($previous);
 		$this->out .= $previous;
 		if ($this->cellStarted) {
+			$this->addElement('td', true);
 			$this->out .= '</td>';
 			$this->cellStarted = false;
 		}
 		if ($this->rowStarted) {
+			$this->addElement('tr', true);
 			$this->out .= '</tr>';
 		}
+		$this->addElement('tr');
 		$this->out .= '<tr>';
 		$this->rowStarted = true;
 	}
 
 	public function startCell($previous) {
+		$this->addElementContent($previous);
 		$this->out .= $previous;
 		if ( ! $this->rowStarted) {
+			$this->addElement('tr');
 			$this->out .= '<td>';
 			$this->rowStarted = true;
 		}
 		if ($this->cellStarted) {
+			$this->addElement('td', true);
 			$this->out .= '</td>';
 			$this->cellStarted = false;
 		}
+		$this->addElement('td');
 		$this->out .= '<td>';
 		$this->cellStarted = true;
 		$this->rowStarted = true;
+	}
+
+	public function getElementHtml() {
+
+		$out = '';
+		foreach ($this->elements as $element) {
+			$out .= $element['isClosing'] ? '</' : '<';
+			$out .= $element['type'];
+			if(isset($element['params']) && trim($element['params'])) {
+				$out .= ' ' . trim($element['params']);
+			}
+			$out .= '>';
+			if ( ! $element['isClosing']) {
+				$out .= $element['content'];
+			}
+		}
+		return $out;
+	}
+
+	public function getHtml() {
+		return $this->getElementHtml();
+		return $this->out;
 	}
 
 	public function convert($wikitext) {
@@ -142,7 +203,7 @@ class TableConverter {
 		$previous = substr($wikitext, $i);
 		$this->end($previous);
 
-		return $this->out;
+		return $this->getHtml();
 
 	}
 }
