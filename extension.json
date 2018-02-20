@@ -1,0 +1,30 @@
+{
+	"name": "TablesInSemantic",
+	"version": "0.1",
+	"author": [
+		"Pierre Boutet"
+	],
+	"url": "https://github.com/wikifab/TablesInSemantic",
+	"descriptionmsg": "tablesinsemantic-desc",
+	"license-name": "MIT",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.28.0"
+	},
+	"MessagesDirs": {
+		"TablesInSemantic": [
+			"i18n"
+		]
+	},
+	"Hooks": {
+		"ParserBeforeStrip": [
+			"TablesInSemantic\\Hooks::onParserBeforeStrip"
+		]
+	},
+	"AutoloadClasses": {
+		"TablesInSemantic\\Hooks": "includes/Hooks.php",
+		"TablesInSemantic\\TableConverter": "includes/TableConverter.php",
+		"TablesInSemantic\\TableParser": "includes/TableParser.php"
+	},
+	"manifest_version": 1
+}

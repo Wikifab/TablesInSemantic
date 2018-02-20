@@ -1,0 +1,8 @@
+{
+    "name": "wikifab/tables-in-semantic",
+    "description": "Mediawiki extension to manage table in semantic data, when a table is in semantic data, it converts wikitable into html table",
+    "type": "mediawiki-extension",
+    "license": "MIT",
+    "require": {
+    }
+}
