@@ -30,7 +30,7 @@ class TableConverter {
 				break;
 			case 'td' :
 			case 'th' :
-				if(preg_match('/^([^\\|]+)\\|(.*)$/', $content, $matches)) {
+				if(preg_match('/^([^\\|]+)\\|(.*)$/s', $content, $matches)) {
 					$this->elements[$i]['params'] = $matches[1];
 					$this->elements[$i]['content'] = substr($content, strlen($matches[1])+1);
 				} else {

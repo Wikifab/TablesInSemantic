@@ -20,8 +20,12 @@ class TableParser {
 		$this->i = $this->indexOfNextTemplate($this->i, $text);
 		while ($this->i !== false) {
 
+			//echo " FIND PROPERTY  :" . str_replace("\n","\\n",substr($text, $this->i, 10)). "\n";
+
 			$templateFound = $this->findTableInTemplate($this->i, $text);
 			if ($templateFound) {
+				//echo " FIND template  :" . str_replace("\n","\\n",substr($templateFound, 0, 10))."\n";
+
 				$wikitextTable = $this->findTableTemplateString($text, $templateFound);
 
 				if( $wikitextTable) {
@@ -30,6 +34,8 @@ class TableParser {
 					$text = str_replace($wikitextTable, $htmlTable, $text);
 					$this->i = $this->i + strlen($htmlTable);
 				} else {
+					//echo " FAIL TO CONVERT\n";
+
 					$this->i = $this->indexOfNextTemplate($this->i, $text);
 				}
 			} else {
@@ -59,8 +65,8 @@ class TableParser {
 
 	public function findTableInTemplate($i, &$text) {
 
-		// recherche '{|' ou '{{' ou '|' ou '}'
-		$pattern = '/({\||{{|\||})/';
+		// recherche '{|' ou '{{' ou '|' ou '}' ou '['
+		$pattern = '/({\||{{|\||}|\[)/';
 
 		/*echo "\n";
 		echo "findTableInTemplate\n";
@@ -70,11 +76,25 @@ class TableParser {
 
 		if (preg_match($pattern, $text, $matches, null, $i)) {
 
-			if($matches[0] == '{{') {
+			if($matches[0] == '[') {
+				// recherche des accolades fermantes
+				$this->i = strpos($text, $matches[0], $i) +1;
+				$r = $this->findClosingCrochet($text, 1, $this->i);
+				if ($r === false) {
+					//echo "CANNOT FIND CLOSING ]";
+					return false;
+				} else {
+					$this->i = $r;
+				}
+				$i = $this->findTableInTemplate($this->i, $text);
+				//echo ("\nRESULT = $i\n\n\n");
+				return $i;
+			} if($matches[0] == '{{') {
 				// recherche des accolades fermantes
 				$this->i = strpos($text, $matches[0], $i) +2;
 				$r = $this->findClosingAccolade($text, 2, $this->i);
 				if ($r === false) {
+					//echo "CANNOT FIND CLOSING";
 					return false;
 				} else {
 					$this->i = $r;
@@ -103,6 +123,23 @@ class TableParser {
 			return false;
 		}
 		return substr($text, $i, $end +2 - $i);
+	}
+
+	public function findClosingCrochet ($text, $nb, $i) {
+		$pattern = '/(\[|\])/';
+
+		if (preg_match($pattern, $text, $matches, null, $i)) {
+			$i = strpos($text, $matches[0], $i) +1;
+			if($matches[0] == '[') {
+				return $this->findClosingCrochet($text, $nb+1, $i);
+			} else if($nb > 1){
+				return $this->findClosingCrochet($text, $nb-1, $i);
+			} else {
+				return $i;
+			}
+		}
+		return false;
+
 	}
 
 	public function findClosingAccolade ($text, $nb, $i) {
