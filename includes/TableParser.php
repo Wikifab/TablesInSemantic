@@ -21,7 +21,6 @@ class TableParser {
 		while ($this->i !== false) {
 
 			$templateFound = $this->findTableInTemplate($this->i, $text);
-
 			if ($templateFound) {
 				$wikitextTable = $this->findTableTemplateString($text, $templateFound);
 
@@ -61,7 +60,7 @@ class TableParser {
 	public function findTableInTemplate($i, &$text) {
 
 		// recherche '{|' ou '{{' ou '|' ou '}'
-		$pattern = '/({\||{{|\|)/';
+		$pattern = '/({\||{{|\||})/';
 
 		/*echo "\n";
 		echo "findTableInTemplate\n";

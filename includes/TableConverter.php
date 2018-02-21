@@ -8,7 +8,7 @@ class TableConverter {
 	var $debug = false;
 
 	var $i = 0, $out = '', $elements = '';
-	var $rowStarted = false, $cellStarted = false;
+	var $rowStarted = false, $cellStarted = false, $headerStarted = false;
 
 	public function __construct() {
 
@@ -29,6 +29,7 @@ class TableConverter {
 				$this->elements[$i]['params'] = str_replace("\n", " ", $content);
 				break;
 			case 'td' :
+			case 'th' :
 				if(preg_match('/^([^\\|]+)\\|(.*)$/', $content, $matches)) {
 					$this->elements[$i]['params'] = $matches[1];
 					$this->elements[$i]['content'] = substr($content, strlen($matches[1])+1);
@@ -47,16 +48,10 @@ class TableConverter {
 	public function end($previous) {
 		$this->addElementContent($previous);
 		$this->out .= $previous;
-		if ($this->cellStarted) {
-			$this->out .= '</td>';
-			$this->cellStarted = false;
-			$this->addElement('td', true);
-		}
-		if ($this->rowStarted) {
-			$this->out .= '</tr>';
-			$this->rowStarted = false;
-			$this->addElement('tr', true);
-		}
+
+		$this->closePreviousCell();
+		$this->closePreviousRow();
+
 		$this->addElement('table', true);
 		$this->out .= '</table>';
 	}
@@ -66,21 +61,44 @@ class TableConverter {
 	}
 
 	public function startHeader($previous) {
-		trigger_error('Not implemented ', E_USER_NOTICE);
-	}
-
-	public function startRow($previous) {
 		$this->addElementContent($previous);
 		$this->out .= $previous;
+		if ( ! $this->rowStarted) {
+			$this->startRow('');
+		}
+		$this->closePreviousCell();
+		$this->addElement('th');
+		$this->out .= '<th>';
+		$this->headerStarted = true;
+	}
+
+	public function closePreviousCell() {
 		if ($this->cellStarted) {
 			$this->addElement('td', true);
 			$this->out .= '</td>';
 			$this->cellStarted = false;
 		}
+		if ($this->headerStarted) {
+			$this->addElement('th', true);
+			$this->out .= '</th>';
+			$this->headerStarted = false;
+		}
+	}
+	public function closePreviousRow() {
 		if ($this->rowStarted) {
 			$this->addElement('tr', true);
 			$this->out .= '</tr>';
 		}
+	}
+
+	public function startRow($previous) {
+		if ($previous) {
+			$this->addElementContent($previous);
+		}
+		$this->out .= $previous;
+
+		$this->closePreviousCell();
+		$this->closePreviousRow();
 		$this->addElement('tr');
 		$this->out .= '<tr>';
 		$this->rowStarted = true;
@@ -90,19 +108,12 @@ class TableConverter {
 		$this->addElementContent($previous);
 		$this->out .= $previous;
 		if ( ! $this->rowStarted) {
-			$this->addElement('tr');
-			$this->out .= '<td>';
-			$this->rowStarted = true;
+			$this->startRow('');
 		}
-		if ($this->cellStarted) {
-			$this->addElement('td', true);
-			$this->out .= '</td>';
-			$this->cellStarted = false;
-		}
+		$this->closePreviousCell();
 		$this->addElement('td');
 		$this->out .= '<td>';
 		$this->cellStarted = true;
-		$this->rowStarted = true;
 	}
 
 	public function getElementHtml() {
