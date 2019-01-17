@@ -126,36 +126,48 @@ class TableParser {
 	}
 
 	public function findClosingCrochet ($text, $nb, $i) {
-		$pattern = '/(\[|\])/';
+		$nextOpen = strpos($text, '[',$i);
+		$nextClose = strpos($text, ']',$i);
+		$openCount = $nb;
 
-		if (preg_match($pattern, $text, $matches, null, $i)) {
-			$i = strpos($text, $matches[0], $i) +1;
-			if($matches[0] == '[') {
-				return $this->findClosingCrochet($text, $nb+1, $i);
-			} else if($nb > 1){
-				return $this->findClosingCrochet($text, $nb-1, $i);
+		while ($nextClose !== false) {
+			if ($nextOpen === false || $nextClose < $nextOpen) {
+				$openCount--;
+				if ($openCount == 0) {
+					return $nextClose +1;
+				}
+				$i = $nextClose +1;
 			} else {
-				return $i;
+				$openCount++;
+				$i = $nextOpen +1;
 			}
+			$nextOpen = strpos($text, '[',$i);
+			$nextClose = strpos($text, ']',$i);
 		}
-		return false;
 
+		return false;
 	}
 
 	public function findClosingAccolade ($text, $nb, $i) {
-		$pattern = '/({|})/';
+		$nextOpen = strpos($text, '{',$i);
+		$nextClose = strpos($text, '}',$i);
+		$openCount = $nb;
 
-		if (preg_match($pattern, $text, $matches, null, $i)) {
-			$i = strpos($text, $matches[0], $i) +1;
-			if($matches[0] == '{') {
-				return $this->findClosingAccolade($text, $nb+1, $i);
-			} else if($nb > 1){
-				return $this->findClosingAccolade($text, $nb-1, $i);
+		while ($nextClose !== false) {
+			if ($nextOpen === false || $nextClose < $nextOpen) {
+				$openCount--;
+				if ($openCount == 0) {
+					return $nextClose +1;
+				}
+				$i = $nextClose +1;
 			} else {
-				return $i;
+				$openCount++;
+				$i = $nextOpen +1;
 			}
+			$nextOpen = strpos($text, '{',$i);
+			$nextClose = strpos($text, '}',$i);
 		}
-		return false;
 
+		return false;
 	}
 }
