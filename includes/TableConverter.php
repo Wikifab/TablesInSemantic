@@ -58,6 +58,7 @@ class TableConverter {
 
 	public function startCaption($previous) {
 		trigger_error('Not implemented ', E_USER_NOTICE);
+		// TODO see temporary fix in convert()
 	}
 
 	public function startHeader($previous) {
@@ -145,6 +146,10 @@ class TableConverter {
 		// {| 	table start,
 		$wikitext = substr($wikitext, 2, strlen($wikitext) - 4);
 
+		// TODO temporary fix
+		$pattern = '/\n\|\+/'; // remove all occurences of \n|+ for as long as nothing is implemented for it
+		$wikitext = preg_replace($pattern, "", $wikitext);
+
 		$this->init();
 		$i = 0;
 
@@ -156,7 +161,7 @@ class TableConverter {
 
 		// recherche :
 
-		$pattern = "/(\n\|\+)|(\n\\|\-)|(\\|\\|)|(\n\!)|(\n\\|)[^\|\-]/";
+		$pattern = "/(\n\|\+)|(\n\|\-)|(\n\!)|(\!\!)|(\n\|)|(\|\|)/";
 		//$pattern = '/(\|\+)|(\\|\\-)/';
 
 		while (preg_match($pattern, $wikitext,$matches,null,$i)) {
