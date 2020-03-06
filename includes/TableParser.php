@@ -27,7 +27,6 @@ class TableParser {
 				//echo " FIND template  :" . str_replace("\n","\\n",substr($templateFound, 0, 10))."\n";
 
 				$wikitextTable = $this->findTableTemplateString($text, $templateFound);
-
 				if( $wikitextTable) {
 					$converter = new TableConverter();
 					$htmlTable = $converter->convert($wikitextTable);

@@ -181,6 +181,53 @@ class TableParserTest extends \PHPUnit_Framework_TestCase {
 }}';
 		$this->assertEquals($expected, $result);
 	}
+	public function testParseWhithParsingInto( ) {
+		$text = '{{Template:
+|test=test
+{|
+|-
+| cel1
+| {{#Attention|test=3|toto}}
+|}
+}}';
+		//var_dump(substr($text, 19));
+
+		$this->instance->parse($text);
+		$result = $text;
+		$expected = '{{Template:
+|test=test
+<table>
+<tr>
+<td> cel1
+</td><td> {{#Attention|test=3|toto}}
+</td></tr></table>
+}}';
+		$this->assertEquals($expected, $result);
+	}
+
+	public function testParseWhithParsingIntoTwo( ) {
+		$text = '{{Template:
+|test=test
+{|
+|-
+| cel1
+| {{#Attention:File:TOTO.jpg|test=3|toto}}
+|}
+}}';
+		//var_dump(substr($text, 19));
+
+		$this->instance->parse($text);
+		$result = $text;
+		$expected = '{{Template:
+|test=test
+<table>
+<tr>
+<td> cel1
+</td><td> {{#Attention:File:TOTO.jpg|test=3|toto}}
+</td></tr></table>
+}}';
+		$this->assertEquals($expected, $result);
+	}
 
 	public function testParseComplexe( ) {
 		$text = '{{Template:

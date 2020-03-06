@@ -103,5 +103,25 @@ class TableConverterTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $result);
 	}
 
+	public function testConvertWithParsingFunction() {
+		$text = '{| cellspacing="0" border="0"
+| height="17" align="left" |234d
+| align="right" |1234
+|-
+| {{#annotatedImageLight:Fichier:NAme.jpg|0=300px|hash=5c103e}}
+| {{#annotatedImageLight:}}
+|}';
+		$result = $this->instance->convert($text);
+		$expected = '<table cellspacing="0" border="0">
+<tr>
+<td height="17" align="left">234d
+</td><td align="right">1234
+</td></tr><tr>
+<td> {{#annotatedImageLight:Fichier:NAme.jpg|0=300px|hash=5c103e}}
+</td><td> {{#annotatedImageLight:}}
+</td></tr></table>';
+		$this->assertEquals($expected, $result);
+	}
+
 
 }
